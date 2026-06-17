@@ -8,22 +8,23 @@ The script monitors running processes using the `top` command, filters processes
 
 The goal of this lab is to practice:
 
-- Linux process monitoring
-- Bash scripting
-- Log management
-- Command pipelines
-- Directory organization
-- Basic automation concepts
+* Linux process monitoring
+* Bash scripting
+* Log management
+* Command pipelines
+* Directory organization
+* Basic automation concepts
 
 ---
 
 ## Technologies Used
 
-- Linux (Ubuntu)
-- Bash scripting
-- `top`
-- `awk`
-- `tee`
+* Linux (Ubuntu)
+* Bash scripting
+* `top`
+* `awk`
+* `tee`
+* `cron`
 
 ---
 
@@ -35,6 +36,9 @@ process-monitor/
 ├── scripts/
 │   └── monitor.sh
 │
+├── config/
+│   └── monitor.conf
+│
 ├── logs/
 │   ├── cpu/
 │   │   └── process-monitor-cpu.log
@@ -44,7 +48,9 @@ process-monitor/
 │
 ├── prints/
 │   ├── script-logic.png
-│   └── logs-output.png
+│   ├── logs-output.png
+│   ├── VirtualBox_ubuntu_14_06_2026_22_48_32.png
+│   └── VirtualBox_ubuntu_14_06_2026_22_48_38.png
 │
 └── README.md
 ```
@@ -53,17 +59,17 @@ process-monitor/
 
 ## How It Works
 
-The script:
-
-1. Creates log directories automatically if they do not exist
-2. Runs the `top` command in batch mode
-3. Ignores header lines from the output
-4. Filters processes using `awk`
+The script: Loads configuration values from an external configuration file
+2. Creates log directories automatically if they do not exist
+3. Runs the `top` command in batch mode
+4. Processes the output with a single execution of `top`
 5. Detects processes with high CPU usage
 6. Detects processes with high memory usage
-7. Separates logs into dedicated directories
-8. Stores execution date and time in log files
-9. Prints execution information in the terminal using `tee`
+7. Ignores processes defined in a whitelist
+8. Separates logs into dedicated directories
+9. Stores execution date and time in log files
+10. Prints execution information in the terminal using `tee`
+11. Supports automated execution through Cron
 
 ---
 
@@ -72,20 +78,15 @@ The script:
 ```bash
 #!/bin/bash
 
-DIR_CPU="/home/gustavo/process-monitor/logs/cpu"
-DIR_MEM="/home/gustavo/process-monitor/logs/memoria"
+source /home/gustavo/process-monitor/config/monitor.conf
 
-LOG_CPU="${DIR_CPU}/process-monitor-cpu.log"
-LOG_MEM="${DIR_MEM}/process-monitor-mem.log"
+ALERT_CPU=10.0
+ALERT_MEM=10.0
 
-mkdir -p "$DIR_CPU"
-mkdir -p "$DIR_MEM"
+WHITELIST=("systemd" "dockerd" "mysql" "nginx")
 
-echo "=== Registro em: $(date) ===" | tee -a "$LOG_CPU" "$LOG_MEM"
 
-top -b -n 1 | awk 'NR>7 && $9 > 50.0 {print $0}' >> "$LOG_CPU"
-
-top -b -n 1 | awk 'NR>7 && $10 > 50.0 {print $0}' >> "$LOG_MEM"
+top -b -n 1
 ```
 
 ---
@@ -110,32 +111,44 @@ top -b -n 1 | awk 'NR>7 && $10 > 50.0 {print $0}' >> "$LOG_MEM"
 
 ![Logs Output](prints/logs-output.png)
 
+### Cron Configuration
+
+![Cron Configuration](prints/VirtualBox_ubuntu_14_06_2026_22_48_32.png)
+
+### Cron Execution Validation
+
+![Cron Validation](prints/VirtualBox_ubuntu_14_06_2026_22_48_38.png)
+
 ---
 
 ## Concepts Practiced
 
-- Linux process analysis
-- CPU usage monitoring
-- Memory usage monitoring
-- Bash pipelines
-- Output redirection
-- Log management
-- Process filtering
-- Directory automation
-- Variable usage in Bash
+* Linux process analysis
+* CPU usage monitoring
+* Memory usage monitoring
+* Bash pipelines
+* Output redirection
+* Log management
+* Process filtering
+* Directory automation
+* Variable usage in Bash
+* External configuration management
+* Process whitelisting
+* Task scheduling with Cron
 
 ---
 
 ## Future Improvements
 
-- Add configurable thresholds
-- Create whitelist for critical processes
-- Add automatic alerts
-- Automate execution using cron
-- Implement process priority adjustments
-- Add automatic process termination for critical resource usage
-- Improve log formatting and reporting
-- Add monitoring statistics
+* Add severity levels (Low, Medium, High, Critical)
+* Add automatic alerts
+* Add email notifications
+* Add Telegram notifications
+* Implement process priority adjustments
+* Add automatic process termination for critical resource usage
+* Improve log formatting and reporting
+* Add monitoring statistics
+* Implement log rotation
 
 ---
 
@@ -150,3 +163,4 @@ Gustavo Henrique Oliveira
 This lab is part of my practical studies in Linux, Cloud, and Cybersecurity.
 
 The focus of this project is to improve hands-on skills with Linux system administration, monitoring, automation, and resource analysis.
+
