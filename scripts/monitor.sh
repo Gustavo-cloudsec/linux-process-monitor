@@ -7,8 +7,8 @@ else
     echo "Erro: Arquivo de configuracao nao encontrado!" && exit 1
 fi
 
-DIR_CPU="/home/gustavo/process-monitor/logs/cpu"
-DIR_MEM="/home/gustavo/process-monitor/logs/memoria"
+DIR_CPU="$HOME/labs/linux-process-monitor/logs/cpu"
+DIR_MEM="$HOME/labs/linux-process-monitor/logs/memoria"
 LOG_CPU="${DIR_CPU}/process-monitor-cpu.log"
 LOG_MEM="${DIR_MEM}/process-monitor-mem.log"
 
@@ -44,6 +44,7 @@ while read -r pid user pr ni virt res shr s cpu mem time command; do
 done <<< "$TOP_DATA"
 
 if [ "$HAS_ALERT" = true ]; then
-
     echo -e "$ALERT_MSG"
+else
+    echo "[$TIMESTAMP] Nenhum processo acima dos limites configurados."
 fi
